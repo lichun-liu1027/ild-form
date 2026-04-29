@@ -1,0 +1,939 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ILD 營養評估問卷</title>
+<style>
+  :root {
+    --teal: #0F766E;
+    --teal-light: #CCFBF1;
+    --teal-mid: #5EEAD4;
+    --amber: #B45309;
+    --amber-light: #FEF3C7;
+    --red: #B91C1C;
+    --red-light: #FEE2E2;
+    --green: #15803D;
+    --green-light: #DCFCE7;
+    --gray-50: #F9FAFB;
+    --gray-100: #F3F4F6;
+    --gray-200: #E5E7EB;
+    --gray-400: #9CA3AF;
+    --gray-600: #4B5563;
+    --gray-800: #1F2937;
+    --shadow: 0 1px 3px rgba(0,0,0,0.08);
+    --shadow-md: 0 4px 6px rgba(0,0,0,0.05);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Helvetica Neue', -apple-system, 'PingFang TC', 'Microsoft JhengHei', sans-serif; background: #F0F9FF; color: var(--gray-800); font-size: 15px; line-height: 1.6; }
+
+  /* Header */
+  .site-header { background: var(--teal); color: white; padding: 1rem 1.5rem; position: sticky; top: 0; z-index: 100; display: flex; align-items: center; justify-content: space-between; box-shadow: var(--shadow-md); }
+  .site-header h1 { font-size: 16px; font-weight: 600; }
+  .site-header .sub { font-size: 12px; opacity: 0.75; margin-top: 1px; }
+  .progress-pill { background: rgba(255,255,255,0.2); border-radius: 20px; padding: 4px 12px; font-size: 12px; font-weight: 500; }
+
+  /* Layout */
+  .main { max-width: 720px; margin: 0 auto; padding: 1.5rem 1rem 4rem; }
+
+  /* Section */
+  .section { background: white; border-radius: 12px; box-shadow: var(--shadow); margin-bottom: 1.25rem; overflow: hidden; }
+  .section-header { background: var(--teal); color: white; padding: 0.75rem 1.25rem; display: flex; align-items: center; gap: 10px; }
+  .section-header .num { background: rgba(255,255,255,0.25); border-radius: 50%; width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; flex-shrink: 0; }
+  .section-header h2 { font-size: 15px; font-weight: 600; }
+  .section-body { padding: 1.25rem; }
+
+  /* Fields */
+  .field { margin-bottom: 1.1rem; }
+  .field:last-child { margin-bottom: 0; }
+  .field-label { font-size: 13px; font-weight: 600; color: var(--gray-600); margin-bottom: 6px; display: flex; align-items: center; gap: 6px; }
+  .req { color: var(--red); font-size: 11px; }
+  .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .field-row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; }
+
+  input[type=text], input[type=number], input[type=date], textarea {
+    width: 100%; padding: 9px 12px; border: 1.5px solid var(--gray-200); border-radius: 8px; font-size: 14px; color: var(--gray-800); background: var(--gray-50); transition: border-color 0.15s; font-family: inherit;
+  }
+  input:focus, textarea:focus { outline: none; border-color: var(--teal); background: white; }
+  .input-unit { display: flex; align-items: center; gap: 6px; }
+  .input-unit input { flex: 1; }
+  .unit { font-size: 13px; color: var(--gray-400); white-space: nowrap; }
+
+  /* Options */
+  .options { display: flex; flex-direction: column; gap: 6px; }
+  .options.row { flex-direction: row; flex-wrap: wrap; gap: 8px; }
+  .opt-btn { display: flex; align-items: flex-start; gap: 10px; padding: 10px 14px; border: 1.5px solid var(--gray-200); border-radius: 8px; cursor: pointer; background: var(--gray-50); transition: all 0.15s; font-size: 14px; line-height: 1.4; user-select: none; }
+  .opt-btn:hover { border-color: var(--teal-mid); background: white; }
+  .opt-btn.sel-A { border-color: var(--teal); background: var(--teal-light); color: #134E4A; }
+  .opt-btn.sel-B { border-color: var(--amber); background: var(--amber-light); color: var(--amber); }
+  .opt-btn.sel-C { border-color: var(--red); background: var(--red-light); color: var(--red); }
+  .opt-btn.sel { border-color: var(--teal); background: var(--teal-light); color: #134E4A; }
+
+  .opt-indicator { width: 18px; height: 18px; border-radius: 50%; border: 2px solid var(--gray-400); flex-shrink: 0; margin-top: 1px; display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
+  .sel-A .opt-indicator, .sel-B .opt-indicator, .sel-C .opt-indicator, .sel .opt-indicator { border-color: currentColor; background: currentColor; }
+  .opt-indicator::after { content: ''; width: 6px; height: 6px; border-radius: 50%; background: white; }
+
+  .opt-check { width: 18px; height: 18px; border-radius: 4px; border: 2px solid var(--gray-400); flex-shrink: 0; margin-top: 1px; display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
+  .sel .opt-check { border-color: var(--teal); background: var(--teal); }
+  .sel .opt-check::after { content: '✓'; color: white; font-size: 11px; line-height: 1; }
+
+  /* SGA badges */
+  .sga-badge { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 700; margin-right: 4px; }
+  .b-A { background: var(--teal-light); color: var(--teal); }
+  .b-B { background: var(--amber-light); color: var(--amber); }
+  .b-C { background: var(--red-light); color: var(--red); }
+
+  /* MEDAS */
+  .medas-card { position: sticky; top: 64px; z-index: 50; background: white; border: 1.5px solid var(--teal-mid); border-radius: 10px; padding: 0.75rem 1rem; margin-bottom: 1rem; display: flex; align-items: center; justify-content: space-between; box-shadow: var(--shadow-md); gap: 12px; }
+  .medas-score-big { font-size: 32px; font-weight: 700; color: var(--teal); line-height: 1; }
+  .medas-score-label { font-size: 12px; color: var(--gray-400); margin-top: 2px; }
+  .medas-level { font-size: 13px; font-weight: 600; padding: 4px 12px; border-radius: 6px; text-align: center; }
+  .medas-bar-wrap { flex: 1; }
+  .medas-bar-track { height: 6px; background: var(--gray-100); border-radius: 3px; overflow: hidden; }
+  .medas-bar-fill { height: 100%; border-radius: 3px; transition: width 0.3s, background 0.3s; }
+  .medas-ticks { display: flex; justify-content: space-between; font-size: 10px; color: var(--gray-400); margin-top: 3px; }
+
+  .medas-row { display: grid; grid-template-columns: 24px 1fr auto; align-items: start; gap: 10px; padding: 12px 0; border-bottom: 1px solid var(--gray-100); }
+  .medas-row:last-child { border-bottom: none; }
+  .medas-q-num { font-size: 11px; color: var(--gray-400); font-weight: 600; }
+  .medas-q-text { font-size: 14px; }
+  .medas-toggle { display: flex; border: 1.5px solid var(--gray-200); border-radius: 6px; overflow: hidden; }
+  .medas-toggle button { padding: 5px 12px; font-size: 12px; font-weight: 500; background: transparent; border: none; cursor: pointer; color: var(--gray-600); transition: all 0.15s; font-family: inherit; }
+  .medas-toggle button.m-yes { background: var(--green-light); color: var(--green); }
+  .medas-toggle button.m-no  { background: var(--red-light); color: var(--red); }
+
+  /* Computed */
+  .computed-val { background: var(--teal-light); color: var(--teal); padding: 8px 12px; border-radius: 8px; font-size: 14px; font-weight: 600; min-height: 38px; display: flex; align-items: center; }
+
+  /* Sub-section */
+  .sub-section { margin-top: 1.25rem; padding-top: 1.25rem; border-top: 1px solid var(--gray-100); }
+  .sub-title { font-size: 12px; font-weight: 700; color: var(--teal); margin-bottom: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; }
+
+  /* Submit */
+  .submit-area { margin-top: 2rem; text-align: center; }
+  .btn-submit { background: var(--teal); color: white; border: none; padding: 14px 40px; border-radius: 10px; font-size: 16px; font-weight: 600; cursor: pointer; font-family: inherit; transition: background 0.15s; box-shadow: var(--shadow-md); }
+  .btn-submit:hover { background: #0F6E56; }
+  .btn-submit:disabled { background: var(--gray-400); cursor: not-allowed; }
+  .submit-note { font-size: 13px; color: var(--gray-400); margin-top: 10px; }
+
+  /* Success overlay */
+  .success-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 200; align-items: center; justify-content: center; }
+  .success-overlay.show { display: flex; }
+  .success-card { background: white; border-radius: 16px; padding: 2rem; text-align: center; max-width: 360px; width: 90%; }
+  .success-icon { font-size: 48px; margin-bottom: 1rem; }
+  .success-card h3 { font-size: 20px; margin-bottom: 0.5rem; color: var(--teal); }
+  .success-card p { font-size: 14px; color: var(--gray-600); margin-bottom: 1.5rem; }
+  .btn-new { background: var(--teal); color: white; border: none; padding: 10px 24px; border-radius: 8px; font-size: 14px; cursor: pointer; font-family: inherit; font-weight: 600; }
+
+  /* Toast */
+  .toast { position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%); background: var(--gray-800); color: white; padding: 10px 20px; border-radius: 8px; font-size: 14px; z-index: 300; opacity: 0; transition: opacity 0.3s; pointer-events: none; white-space: nowrap; }
+  .toast.show { opacity: 1; }
+
+  @media (max-width: 560px) {
+    .field-row, .field-row3 { grid-template-columns: 1fr 1fr; }
+    .medas-card { flex-wrap: wrap; }
+    .medas-bar-wrap { order: 3; width: 100%; }
+  }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div>
+    <div style="font-size:16px;font-weight:600;">ILD 營養評估問卷</div>
+    <div class="sub">間質性肺病　門診收案</div>
+  </div>
+  <div class="progress-pill" id="progress-pill">開始填寫</div>
+</header>
+
+<main class="main">
+
+<!-- ══════════════════════════════════════════
+  ① 基本識別
+══════════════════════════════════════════ -->
+<div class="section">
+  <div class="section-header"><div class="num">①</div><h2>基本識別</h2></div>
+  <div class="section-body">
+    <div class="field-row">
+      <div class="field">
+        <div class="field-label">病歷號 <span class="req">必填</span></div>
+        <input type="text" id="q-mrn" placeholder="病歷號" oninput="update()">
+      </div>
+      <div class="field">
+        <div class="field-label">姓名 <span class="req">必填</span></div>
+        <input type="text" id="q-name" placeholder="病人姓名" oninput="update()">
+      </div>
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <div class="field-label">性別 <span class="req">必填</span></div>
+        <div class="options row" id="q-sex">
+          <div class="opt-btn" onclick="selectRadio('q-sex',this,'男')"><div class="opt-indicator"></div>男</div>
+          <div class="opt-btn" onclick="selectRadio('q-sex',this,'女')"><div class="opt-indicator"></div>女</div>
+        </div>
+      </div>
+      <div class="field">
+        <div class="field-label">年齡</div>
+        <div class="input-unit"><input type="number" id="q-age" placeholder="歲" oninput="update()"><span class="unit">歲</span></div>
+      </div>
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <div class="field-label">收案日期 <span class="req">必填</span></div>
+        <input type="date" id="q-date" oninput="update()">
+      </div>
+      <div class="field">
+        <div class="field-label">收案次別 <span class="req">必填</span></div>
+        <div class="options row" id="q-visit">
+          <div class="opt-btn" onclick="selectRadio('q-visit',this,'初次收案')"><div class="opt-indicator"></div>初次收案</div>
+          <div class="opt-btn" onclick="selectRadio('q-visit',this,'第2次')"><div class="opt-indicator"></div>第2次</div>
+        </div>
+      </div>
+    </div>
+    <div class="field">
+      <div class="field-label">填寫者 <span class="req">必填</span></div>
+      <div class="options row" id="q-rd">
+        <div class="opt-btn" onclick="selectRadio('q-rd',this,'劉俐君');showOtherRD(false)"><div class="opt-indicator"></div>劉俐君</div>
+        <div class="opt-btn" onclick="selectRadio('q-rd',this,'廖瑞華');showOtherRD(false)"><div class="opt-indicator"></div>廖瑞華</div>
+        <div class="opt-btn" onclick="selectRadio('q-rd',this,'其他');showOtherRD(true)"><div class="opt-indicator"></div>其他</div>
+      </div>
+      <div id="other-rd-wrap" style="display:none;margin-top:8px;">
+        <input type="text" id="q-rd-other" placeholder="請填寫姓名" oninput="update()">
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+  ② 身體測量 & BIA
+══════════════════════════════════════════ -->
+<div class="section">
+  <div class="section-header"><div class="num">②</div><h2>身體測量 &amp; BIA</h2></div>
+  <div class="section-body">
+    <div class="field-row">
+      <div class="field">
+        <div class="field-label">身高 <span class="req">必填</span></div>
+        <div class="input-unit"><input type="number" id="q-ht" placeholder="cm" oninput="calcBMI()"><span class="unit">cm</span></div>
+      </div>
+      <div class="field">
+        <div class="field-label">目前體重 <span class="req">必填</span></div>
+        <div class="input-unit"><input type="number" id="q-wt" placeholder="kg" oninput="calcBMI()"><span class="unit">kg</span></div>
+      </div>
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <div class="field-label">BMI（自動計算）</div>
+        <div class="computed-val" id="bmi-val">—</div>
+      </div>
+      <div class="field">
+        <div class="field-label">BIA 測量時段</div>
+        <div class="options row" id="q-biatime">
+          <div class="opt-btn" onclick="selectRadio('q-biatime',this,'08:00–10:00')"><div class="opt-indicator"></div>08–10</div>
+          <div class="opt-btn" onclick="selectRadio('q-biatime',this,'10:00–12:00')"><div class="opt-indicator"></div>10–12</div>
+          <div class="opt-btn" onclick="selectRadio('q-biatime',this,'12:00–14:00')"><div class="opt-indicator"></div>12–14</div>
+          <div class="opt-btn" onclick="selectRadio('q-biatime',this,'14:00後')"><div class="opt-indicator"></div>14後</div>
+        </div>
+      </div>
+    </div>
+    <div class="field-row" style="grid-template-columns:1fr 1fr 1fr 1fr;">
+      <div class="field">
+        <div class="field-label">3M 前體重</div>
+        <div class="input-unit"><input type="number" id="q-wt3m" placeholder="kg" oninput="calcWeight()"><span class="unit">kg</span></div>
+      </div>
+      <div class="field">
+        <div class="field-label">體重流失%（3M）</div>
+        <div class="computed-val" id="wl-val">—</div>
+      </div>
+      <div class="field">
+        <div class="field-label">6M 前體重</div>
+        <div class="input-unit"><input type="number" id="q-wt6m" placeholder="kg" oninput="calcWeight()"><span class="unit">kg</span></div>
+      </div>
+      <div class="field">
+        <div class="field-label">體重流失%（6M）</div>
+        <div class="computed-val" id="wl6-val">—</div>
+      </div>
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <div class="field-label">InBody-SMI</div>
+        <div class="input-unit"><input type="number" id="q-smi" placeholder="kg/m²" oninput="update()"><span class="unit">kg/m²</span></div>
+      </div>
+      <div class="field">
+        <div class="field-label">InBody-PBF 體脂率</div>
+        <div class="input-unit"><input type="number" id="q-pbf" placeholder="%" oninput="update()"><span class="unit">%</span></div>
+      </div>
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <div class="field-label">握力（最大值）</div>
+        <div class="input-unit"><input type="number" id="q-grip" placeholder="kg" step="0.1" oninput="calcGrip()"><span class="unit">kg</span></div>
+      </div>
+      <div class="field">
+        <div class="field-label">握力判讀（AWGS 2019）</div>
+        <div class="computed-val" id="grip-val">—</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+  ③ SGA
+══════════════════════════════════════════ -->
+<div class="section">
+  <div class="section-header"><div class="num">③</div><h2>SGA 主觀整體評估</h2></div>
+  <div class="section-body">
+
+    <!-- S1 -->
+    <div class="sub-title">S1　體重變化</div>
+    <div class="field">
+      <div class="field-label">過去 6 個月體重變化（非液體）</div>
+      <div class="options" id="q-s1a">
+        <div class="opt-btn" onclick="selectSGA('q-s1a',this,'A')"><div class="opt-indicator"></div><span class="sga-badge b-A">A</span>&lt;5% 流失，或體重穩定／增加</div>
+        <div class="opt-btn" onclick="selectSGA('q-s1a',this,'B')"><div class="opt-indicator"></div><span class="sga-badge b-B">B</span>5–10% 流失</div>
+        <div class="opt-btn" onclick="selectSGA('q-s1a',this,'C')"><div class="opt-indicator"></div><span class="sga-badge b-C">C</span>&gt;10% 流失</div>
+        <div class="opt-btn" onclick="selectSGA('q-s1a',this,'A')"><div class="opt-indicator"></div>不確定（依體重記錄估算）</div>
+      </div>
+    </div>
+    <div class="field">
+      <div class="field-label">過去 2 週體重趨勢</div>
+      <div class="options" id="q-s1b">
+        <div class="opt-btn" onclick="selectSGA('q-s1b',this,'A')"><div class="opt-indicator"></div><span class="sga-badge b-A">A</span>穩定或增加</div>
+        <div class="opt-btn" onclick="selectSGA('q-s1b',this,'B')"><div class="opt-indicator"></div><span class="sga-badge b-B">B</span>無變化但持續偏低</div>
+        <div class="opt-btn" onclick="selectSGA('q-s1b',this,'C')"><div class="opt-indicator"></div><span class="sga-badge b-C">C</span>持續下降</div>
+      </div>
+    </div>
+
+    <!-- S2 -->
+    <div class="sub-section">
+      <div class="sub-title">S2　飲食攝取變化</div>
+      <div class="field">
+        <div class="field-label">目前飲食狀況</div>
+        <div class="options" id="q-s2a">
+          <div class="opt-btn" onclick="selectSGA('q-s2a',this,'A')"><div class="opt-indicator"></div><span class="sga-badge b-A">A</span>無變化，攝取正常</div>
+          <div class="opt-btn" onclick="selectSGA('q-s2a',this,'B')"><div class="opt-indicator"></div><span class="sga-badge b-B">B</span>次優飲食／全液態／低熱量流質</div>
+          <div class="opt-btn" onclick="selectSGA('q-s2a',this,'C')"><div class="opt-indicator"></div><span class="sga-badge b-C">C</span>完全禁食／飢餓狀態</div>
+        </div>
+      </div>
+      <div class="field">
+        <div class="field-label">攝取趨勢（過去 2 週）</div>
+        <div class="options" id="q-s2b">
+          <div class="opt-btn" onclick="selectSGA('q-s2b',this,'A')"><div class="opt-indicator"></div><span class="sga-badge b-A">A</span>穩定或改善中</div>
+          <div class="opt-btn" onclick="selectSGA('q-s2b',this,'B')"><div class="opt-indicator"></div><span class="sga-badge b-B">B</span>邊緣攝取，趨勢不明</div>
+          <div class="opt-btn" onclick="selectSGA('q-s2b',this,'C')"><div class="opt-indicator"></div><span class="sga-badge b-C">C</span>攝取差且持續減少</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- S3 -->
+    <div class="sub-section">
+      <div class="sub-title">S3　腸胃道症狀（需持續 &gt;2 週）</div>
+      <div class="field">
+        <div class="field-label">整體腸胃症狀評級</div>
+        <div class="options" id="q-s3a">
+          <div class="opt-btn" onclick="selectSGA('q-s3a',this,'A')"><div class="opt-indicator"></div><span class="sga-badge b-A">A</span>無／偶爾</div>
+          <div class="opt-btn" onclick="selectSGA('q-s3a',this,'B')"><div class="opt-indicator"></div><span class="sga-badge b-B">B</span>部分症狀每天出現且 &gt;2 週</div>
+          <div class="opt-btn" onclick="selectSGA('q-s3a',this,'C')"><div class="opt-indicator"></div><span class="sga-badge b-C">C</span>噁心、嘔吐、腹瀉、食慾不振全部每天 &gt;2 週</div>
+        </div>
+      </div>
+      <div class="field">
+        <div class="field-label">症狀細項（供記錄，不計分）</div>
+        <div class="options" id="q-s3b" style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+          <div class="opt-btn" onclick="toggleCheck(this,'吃東西會疼痛')"><div class="opt-check"></div>吃東西會疼痛</div>
+          <div class="opt-btn" onclick="toggleCheck(this,'厭食')"><div class="opt-check"></div>厭食</div>
+          <div class="opt-btn" onclick="toggleCheck(this,'嘔吐')"><div class="opt-check"></div>嘔吐</div>
+          <div class="opt-btn" onclick="toggleCheck(this,'噁心')"><div class="opt-check"></div>噁心</div>
+          <div class="opt-btn" onclick="toggleCheck(this,'吞嚥困難')"><div class="opt-check"></div>吞嚥困難</div>
+          <div class="opt-btn" onclick="toggleCheck(this,'腹瀉')"><div class="opt-check"></div>腹瀉</div>
+          <div class="opt-btn" onclick="toggleCheck(this,'牙齒問題')"><div class="opt-check"></div>牙齒問題</div>
+          <div class="opt-btn" onclick="toggleCheck(this,'易飽脹')"><div class="opt-check"></div>易飽脹</div>
+          <div class="opt-btn" onclick="toggleCheck(this,'便秘')"><div class="opt-check"></div>便秘</div>
+          <div class="opt-btn" onclick="toggleCheck(this,'皆沒有')"><div class="opt-check"></div>皆沒有</div>
+          <div class="opt-btn" id="gi-other-btn" onclick="toggleGIOther(this)" style="grid-column:1/-1;"><div class="opt-check"></div>其他（請說明）</div>
+        </div>
+        <div id="gi-other-wrap" style="display:none;margin-top:8px;">
+          <input type="text" id="q-gi-other" placeholder="例如：喘、胸悶影響進食…" oninput="update()">
+        </div>
+      </div>
+    </div>
+
+    <!-- S4 -->
+    <div class="sub-section">
+      <div class="sub-title">S4　功能狀態</div>
+      <div class="field">
+        <div class="field-label">目前功能狀態</div>
+        <div class="options" id="q-s4a">
+          <div class="opt-btn" onclick="selectSGA('q-s4a',this,'A')"><div class="opt-indicator"></div><span class="sga-badge b-A">A</span>無障礙，正常活動</div>
+          <div class="opt-btn" onclick="selectSGA('q-s4a',this,'B')"><div class="opt-indicator"></div><span class="sga-badge b-B">B</span>日常活動困難（走路、爬梯、外出）</div>
+          <div class="opt-btn" onclick="selectSGA('q-s4a',this,'C')"><div class="opt-indicator"></div><span class="sga-badge b-C">C</span>臥床／輪椅依賴</div>
+        </div>
+      </div>
+      <div class="field">
+        <div class="field-label">過去 2 週功能趨勢</div>
+        <div class="options" id="q-s4b">
+          <div class="opt-btn" onclick="selectSGA('q-s4b',this,'A')"><div class="opt-indicator"></div><span class="sga-badge b-A">A</span>改善或穩定</div>
+          <div class="opt-btn" onclick="selectSGA('q-s4b',this,'B')"><div class="opt-indicator"></div><span class="sga-badge b-B">B</span>無變化</div>
+          <div class="opt-btn" onclick="selectSGA('q-s4b',this,'C')"><div class="opt-indicator"></div><span class="sga-badge b-C">C</span>退步</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- S5 -->
+    <div class="sub-section">
+      <div class="sub-title">S5　身體評估</div>
+      <div class="field">
+        <div class="field-label">皮下脂肪（眼眶下、三頭肌、二頭肌）</div>
+        <div class="options" id="q-s5fat">
+          <div class="opt-btn" onclick="selectSGA('q-s5fat',this,'A')"><div class="opt-indicator"></div><span class="sga-badge b-A">A</span>正常、豐滿</div>
+          <div class="opt-btn" onclick="selectSGA('q-s5fat',this,'B')"><div class="opt-indicator"></div><span class="sga-badge b-B">B</span>輕微凹陷／空間縮小</div>
+          <div class="opt-btn" onclick="selectSGA('q-s5fat',this,'C')"><div class="opt-indicator"></div><span class="sga-badge b-C">C</span>明顯凹陷／深眼窩</div>
+        </div>
+      </div>
+      <div class="field">
+        <div class="field-label">肌肉消耗（太陽穴、肩、鎖骨、股四頭肌）</div>
+        <div class="options" id="q-s5mus">
+          <div class="opt-btn" onclick="selectSGA('q-s5mus',this,'A')"><div class="opt-indicator"></div><span class="sga-badge b-A">A</span>肌肉清晰，無凹陷</div>
+          <div class="opt-btn" onclick="selectSGA('q-s5mus',this,'B')"><div class="opt-indicator"></div><span class="sga-badge b-B">B</span>輕微消耗／輕微凹陷</div>
+          <div class="opt-btn" onclick="selectSGA('q-s5mus',this,'C')"><div class="opt-indicator"></div><span class="sga-badge b-C">C</span>明顯消耗／骨骼突出</div>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <div class="field-label">水腫（與營養不良相關）</div>
+          <div class="options" id="q-s5edm">
+            <div class="opt-btn" onclick="selectSGA('q-s5edm',this,'A')"><div class="opt-indicator"></div><span class="sga-badge b-A">A</span>無</div>
+            <div class="opt-btn" onclick="selectSGA('q-s5edm',this,'B')"><div class="opt-indicator"></div><span class="sga-badge b-B">B</span>輕中度</div>
+            <div class="opt-btn" onclick="selectSGA('q-s5edm',this,'C')"><div class="opt-indicator"></div><span class="sga-badge b-C">C</span>嚴重</div>
+          </div>
+        </div>
+        <div class="field">
+          <div class="field-label">腹水（與營養不良相關）</div>
+          <div class="options" id="q-s5asc">
+            <div class="opt-btn" onclick="selectSGA('q-s5asc',this,'A')"><div class="opt-indicator"></div><span class="sga-badge b-A">A</span>無</div>
+            <div class="opt-btn" onclick="selectSGA('q-s5asc',this,'B')"><div class="opt-indicator"></div><span class="sga-badge b-B">B</span>輕中度</div>
+            <div class="opt-btn" onclick="selectSGA('q-s5asc',this,'C')"><div class="opt-indicator"></div><span class="sga-badge b-C">C</span>嚴重</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Final -->
+    <div class="sub-section">
+      <div class="sub-title">SGA 最終分級　<span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--gray-400);font-size:11px;">綜合以上五個面向，由營養師判斷</span></div>
+      <div class="field">
+        <div class="field-label">SGA 最終分級 <span class="req">必填</span></div>
+        <div class="options" id="q-sga-final">
+          <div class="opt-btn" onclick="selectSGA('q-sga-final',this,'A')"><div class="opt-indicator"></div><span class="sga-badge b-A">A</span>營養良好（Well-nourished）</div>
+          <div class="opt-btn" onclick="selectSGA('q-sga-final',this,'B')"><div class="opt-indicator"></div><span class="sga-badge b-B">B</span>輕中度營養不良（Mildly/Moderately malnourished）</div>
+          <div class="opt-btn" onclick="selectSGA('q-sga-final',this,'C')"><div class="opt-indicator"></div><span class="sga-badge b-C">C</span>重度營養不良（Severely malnourished）</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+  ④ MEDAS
+══════════════════════════════════════════ -->
+<div class="section">
+  <div class="section-header"><div class="num">④</div><h2>MEDAS 地中海飲食評估</h2></div>
+  <div class="section-body">
+    <div id="medas-qs"></div>
+    <div class="medas-card" style="margin-top:1rem;">
+      <div>
+        <div class="medas-score-big" id="medas-total">0</div>
+        <div class="medas-score-label">/ 14 分</div>
+      </div>
+      <div class="medas-bar-wrap">
+        <div class="medas-bar-track"><div class="medas-bar-fill" id="medas-bar" style="width:0%;background:#E24B4A;"></div></div>
+        <div class="medas-ticks"><span>0</span><span>6</span><span>9</span><span>14</span></div>
+      </div>
+      <div>
+        <div class="medas-level" id="medas-level" style="background:#FEE2E2;color:#B91C1C;">未完成</div>
+        <div style="font-size:11px;color:var(--gray-400);text-align:center;margin-top:3px;" id="medas-done">0/14</div>
+      </div>
+    </div>
+    <div style="background:#F0F9FF;border:1.5px solid #5EEAD4;border-radius:8px;padding:10px 14px;margin-top:0.75rem;font-size:13px;color:#0F766E;line-height:1.7;">
+      <strong>評分等級參考：</strong>　
+      🔴 <strong>低（≤6分）</strong>：飲食型態與地中海飲食差距大，建議積極介入　　
+      🟡 <strong>中（7–8分）</strong>：部分符合，仍有改善空間　　
+      🟢 <strong>高（≥9分）</strong>：飲食型態良好，接近地中海飲食
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+  ⑤ 一日飲食回顧
+══════════════════════════════════════════ -->
+<div class="section">
+  <div class="section-header"><div class="num">⑤</div><h2>一日飲食回顧</h2></div>
+  <div class="section-body">
+    <div class="field-row3">
+        <div class="field">
+          <div class="field-label">熱量攝取</div>
+          <div class="input-unit"><input type="number" id="q-kcal" placeholder="kcal" oninput="calcProtein()"><span class="unit">kcal/day</span></div>
+        </div>
+        <div class="field">
+          <div class="field-label">蛋白質</div>
+          <div class="input-unit"><input type="number" id="q-prot" placeholder="g" oninput="calcProtein()"><span class="unit">g/day</span></div>
+        </div>
+        <div class="field">
+          <div class="field-label">蛋白質（自動算）</div>
+          <div class="computed-val" id="prot-val">—</div>
+        </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+  ⑥ 衛教紀錄
+══════════════════════════════════════════ -->
+<div class="section">
+  <div class="section-header"><div class="num">⑥</div><h2>營養衛教紀錄</h2></div>
+  <div class="section-body">
+    <div class="field">
+      <div class="field-label">本次是否給予衛教？</div>
+      <div class="options row" id="q-edu">
+        <div class="opt-btn" onclick="selectRadio('q-edu',this,'是');showEdu(true)"><div class="opt-indicator"></div>是</div>
+        <div class="opt-btn" onclick="selectRadio('q-edu',this,'否');showEdu(false)"><div class="opt-indicator"></div>否</div>
+      </div>
+    </div>
+    <div id="section-edu" style="display:none;margin-top:1rem;">
+      <div class="field-row">
+        <div class="field">
+          <div class="field-label">衛教內容</div>
+          <div class="options" id="q-edu-content">
+            <div class="opt-btn" onclick="toggleCheck(this,'高蛋白飲食')"><div class="opt-check"></div>高蛋白飲食</div>
+            <div class="opt-btn" onclick="toggleCheck(this,'抗發炎／地中海飲食')"><div class="opt-check"></div>抗發炎／地中海飲食</div>
+            <div class="opt-btn" onclick="toggleCheck(this,'兩者皆給')"><div class="opt-check"></div>兩者皆給</div>
+            <div class="opt-btn" onclick="toggleCheck(this,'其他')"><div class="opt-check"></div>其他</div>
+          </div>
+        </div>
+        <div class="field">
+          <div class="field-label">衛教方式</div>
+          <div class="options" id="q-edu-method">
+            <div class="opt-btn" onclick="toggleCheck(this,'口頭')"><div class="opt-check"></div>口頭</div>
+            <div class="opt-btn" onclick="toggleCheck(this,'書面衛教單')"><div class="opt-check"></div>書面衛教單</div>
+            <div class="opt-btn" onclick="toggleCheck(this,'兩者皆給')"><div class="opt-check"></div>兩者皆給</div>
+          </div>
+        </div>
+      </div>
+      <div class="field" style="margin-top:0.75rem;">
+        <div class="field-label">衛教觸發原因</div>
+        <div class="options row" id="q-edu-reason">
+          <div class="opt-btn" onclick="toggleCheck(this,'SGA B/C 級')"><div class="opt-check"></div>SGA B/C 級</div>
+          <div class="opt-btn" onclick="toggleCheck(this,'MEDAS ≤6 分')"><div class="opt-check"></div>MEDAS ≤6 分</div>
+          <div class="opt-btn" onclick="toggleCheck(this,'肌少症風險')"><div class="opt-check"></div>肌少症風險</div>
+          <div class="opt-btn" onclick="toggleCheck(this,'其他')"><div class="opt-check"></div>其他</div>
+        </div>
+      </div>
+    </div>
+    <div class="field" style="margin-top:1rem;">
+      <div class="field-label">備註／其他觀察</div>
+      <textarea id="q-note" rows="3" placeholder="選填…" oninput="update()"></textarea>
+    </div>
+  </div>
+</div>
+
+<!-- Submit -->
+<div class="submit-area">
+  <button class="btn-submit" id="btn-submit" onclick="submitForm()">送出本筆資料</button>
+  <div class="submit-note">送出後資料將儲存至 Google Sheets</div>
+  <div class="submit-note" style="margin-top:4px;color:var(--red);" id="submit-msg"></div>
+</div>
+
+</main>
+
+<!-- Success -->
+<div class="success-overlay" id="success-overlay">
+  <div class="success-card">
+    <div class="success-icon">✓</div>
+    <h3>資料已儲存！</h3>
+    <p id="success-detail">本筆資料已成功送出至 Google Sheets。</p>
+    <button class="btn-new" onclick="location.reload()">填寫下一位病人</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxWxQXWhFExblnrRqyHEJ7nTMyvYSp5NwVUZBbAnfJRGXXXMNkRPAcbN5jkPARoa7Mj/exec';
+
+// ── State ──────────────────────────────────
+const sgaVals   = {};
+const radioVals = {};
+const checkVals = {};
+const medasState = new Array(14).fill(null);
+
+const medasQs = [
+  { t: '橄欖油為主要烹飪用油', h: '炒菜、拌沙拉、沾麵包等用油，以橄欖油為主即符合' },
+  { t: '每天使用橄欖油 ≥ 4 湯匙', h: '1 湯匙 ≈ 15ml，4 湯匙 ≈ 60ml（含烹飪及調味用）' },
+  { t: '每天蔬菜 ≥ 2 份', h: '1 份 ≈ 200g 生重（約 1 大碗熟菜）' },
+  { t: '每天水果 ≥ 3 份', h: '1 份 ≈ 150–200g（約 1 個中型水果）；不含果汁' },
+  { t: '紅肉或加工肉品 < 1 份/天', h: '紅肉：豬、牛、羊；加工肉品：香腸、火腿、培根。1 份 ≈ 100–150g（熟重）' },
+  { t: '每週奶油／乳瑪琳／鮮奶油 < 1 份', h: '1 份 ≈ 12g（約 1 湯匙）；包含塗抹及烹飪用量' },
+  { t: '每週含糖飲料 < 1 杯', h: '汽水、手搖飲、瓶裝果汁、運動飲料等；無糖茶、黑咖啡不算' },
+  { t: '每週豆類 ≥ 3 份', h: '1 份 ≈ 150g 熟重（約半碗）；鷹嘴豆、扁豆、黑豆、毛豆等' },
+  { t: '每週魚或海鮮 ≥ 3 份', h: '1 份 ≈ 150g（約半個手掌大小）；各類魚、蝦、貝類、花枝等' },
+  { t: '每週甜點／糕點 < 3 份', h: '蛋糕、餅乾、糖果、冰淇淋等甜食；1 份 ≈ 1 小塊或 1 包零食' },
+  { t: '每週堅果 ≥ 3 份', h: '1 份 ≈ 30g（約 1 小把）；核桃、杏仁、腰果等，選原味無鹽為佳' },
+  { t: '以禽肉取代紅肉', h: '禽肉指雞、鴨、鵝；主要肉類來源以禽肉為主、紅肉為輔即符合' },
+  { t: '每週以番茄醬／大蒜／洋蔥料理蔬菜 ≥ 2 次', h: '以這些食材為基底烹煮，例如番茄炒蛋、蒜炒青菜、洋蔥燉菜等' },
+  { t: '飲酒量：女性每天 ≥ 1 杯、男性每天 ≥ 2 杯葡萄酒', h: '1 杯 ≈ 150ml 葡萄酒；完全不飲酒或飲酒未達上述量 → 不符合（0分）；此題反映地中海飲食文化，如實填答即可' },
+];
+
+// ── MEDAS ──────────────────────────────────
+function buildMedas() {
+  const c = document.getElementById('medas-qs');
+  c.innerHTML = '';
+  medasQs.forEach((q, i) => {
+    const row = document.createElement('div');
+    row.className = 'medas-row';
+    const yc = medasState[i] === 1 ? 'm-yes' : '';
+    const nc = medasState[i] === 0 ? 'm-no'  : '';
+    row.innerHTML = `
+      <div class="medas-q-num">Q${i+1}</div>
+      <div class="medas-q-text">
+        ${q.t}
+        <div style="font-size:11px;color:#6B7280;margin-top:3px;">▸ ${q.h}</div>
+      </div>
+      <div class="medas-toggle">
+        <button class="${yc}" onclick="answerMedas(${i},1,this)">符合</button>
+        <button class="${nc}" onclick="answerMedas(${i},0,this)">不符合</button>
+      </div>`;
+    c.appendChild(row);
+  });
+  updateMedas();
+}
+
+function answerMedas(i, val, btn) {
+  medasState[i] = val;
+  btn.parentElement.querySelectorAll('button').forEach(b => b.className = '');
+  btn.className = val === 1 ? 'm-yes' : 'm-no';
+  updateMedas(); update();
+}
+
+function updateMedas() {
+  const done  = medasState.filter(v => v !== null).length;
+  const total = medasState.filter(v => v === 1).length;
+  document.getElementById('medas-total').textContent = total;
+  document.getElementById('medas-done').textContent  = done + '/14';
+  const bar = document.getElementById('medas-bar');
+  bar.style.width      = Math.round(total/14*100) + '%';
+  bar.style.background = total <= 6 ? '#E24B4A' : total <= 8 ? '#EF9F27' : '#22C55E';
+  const lvl = document.getElementById('medas-level');
+  if (done < 14) {
+    lvl.textContent = '未完成'; lvl.style.cssText = 'background:#FEE2E2;color:#B91C1C;font-size:13px;font-weight:600;padding:4px 12px;border-radius:6px;';
+  } else if (total <= 6) {
+    lvl.textContent = '低（≤6）'; lvl.style.cssText = 'background:#FEE2E2;color:#B91C1C;font-size:13px;font-weight:600;padding:4px 12px;border-radius:6px;';
+  } else if (total <= 8) {
+    lvl.textContent = '中（7–8）'; lvl.style.cssText = 'background:#FEF3C7;color:#B45309;font-size:13px;font-weight:600;padding:4px 12px;border-radius:6px;';
+  } else {
+    lvl.textContent = '高（≥9）'; lvl.style.cssText = 'background:#DCFCE7;color:#15803D;font-size:13px;font-weight:600;padding:4px 12px;border-radius:6px;';
+  }
+}
+
+// ── Interactions ────────────────────────────
+function selectSGA(id, el, grade) {
+  document.querySelectorAll('#'+id+' .opt-btn').forEach(b => b.className = 'opt-btn');
+  el.className = 'opt-btn sel-' + grade;
+  sgaVals[id] = grade; update();
+}
+
+function selectRadio(id, el, val) {
+  document.querySelectorAll('#'+id+' .opt-btn').forEach(b => b.className = 'opt-btn');
+  el.className = 'opt-btn sel';
+  radioVals[id] = val; update();
+}
+
+function toggleCheck(el, val) {
+  el.classList.toggle('sel');
+  const id = el.closest('.options').id;
+  if (!checkVals[id]) checkVals[id] = [];
+  if (el.classList.contains('sel')) {
+    if (!checkVals[id].includes(val)) checkVals[id].push(val);
+  } else {
+    checkVals[id] = checkVals[id].filter(v => v !== val);
+  }
+  update();
+}
+
+function toggleGIOther(el) {
+  el.classList.toggle('sel');
+  const wrap = document.getElementById('gi-other-wrap');
+  const show = el.classList.contains('sel');
+  wrap.style.display = show ? 'block' : 'none';
+  if (!show) document.getElementById('q-gi-other').value = '';
+  const id = el.closest('.options').id;
+  if (!checkVals[id]) checkVals[id] = [];
+  if (show) { if (!checkVals[id].includes('其他')) checkVals[id].push('其他'); }
+  else { checkVals[id] = checkVals[id].filter(v => v !== '其他'); }
+  update();
+}
+
+function showOtherRD(show) {
+  document.getElementById('other-rd-wrap').style.display = show ? 'block' : 'none';
+  if (!show) document.getElementById('q-rd-other').value = '';
+  update();
+}
+
+function calcGrip() {
+  const grip = parseFloat(document.getElementById('q-grip').value);
+  const sex  = radioVals['q-sex'];
+  const el   = document.getElementById('grip-val');
+  if (!grip) { el.textContent = '—'; el.style.background = ''; el.style.color = ''; return; }
+  if (!sex)  { el.textContent = '請先填寫性別'; el.style.background = '#FEF3C7'; el.style.color = '#B45309'; return; }
+  const cutoff = sex === '男' ? 28 : 18;
+  if (grip < cutoff) {
+    el.textContent  = '⚠️ 肌力低下（< ' + cutoff + ' kg）';
+    el.style.background = '#FEE2E2'; el.style.color = '#B91C1C';
+  } else {
+    el.textContent  = '✓ 正常（≥ ' + cutoff + ' kg）';
+    el.style.background = '#DCFCE7'; el.style.color = '#15803D';
+  }
+  update();
+}
+
+function show24hr(show) {
+  document.getElementById('section-24hr').style.display = show ? 'block' : 'none';
+  update();
+}
+
+function showEdu(show) {
+  document.getElementById('section-edu').style.display = show ? 'block' : 'none';
+  update();
+}
+
+// ── Computed ────────────────────────────────
+function calcBMI() {
+  const h = parseFloat(document.getElementById('q-ht').value);
+  const w = parseFloat(document.getElementById('q-wt').value);
+  document.getElementById('bmi-val').textContent =
+    (h > 0 && w > 0) ? (w / ((h/100)**2)).toFixed(1) + ' kg/m²' : '—';
+  calcWeight(); calcProtein(); update();
+}
+
+function calcWeight() {
+  const w  = parseFloat(document.getElementById('q-wt').value);
+  const w3 = parseFloat(document.getElementById('q-wt3m').value);
+  const w6 = parseFloat(document.getElementById('q-wt6m').value);
+  // 3M
+  const el3 = document.getElementById('wl-val');
+  if (w3 > 0 && w > 0) {
+    const pct = ((w3 - w) / w3 * 100).toFixed(1);
+    el3.textContent = pct + '%';
+    el3.style.background = parseFloat(pct) >= 5 ? '#FEE2E2' : '#CCFBF1';
+    el3.style.color      = parseFloat(pct) >= 5 ? '#B91C1C' : '#0F766E';
+  } else { el3.textContent = '—'; el3.style.background = ''; el3.style.color = ''; }
+  // 6M
+  const el6 = document.getElementById('wl6-val');
+  if (w6 > 0 && w > 0) {
+    const pct6 = ((w6 - w) / w6 * 100).toFixed(1);
+    el6.textContent = pct6 + '%';
+    el6.style.background = parseFloat(pct6) >= 10 ? '#FEE2E2' : parseFloat(pct6) >= 5 ? '#FEF3C7' : '#CCFBF1';
+    el6.style.color      = parseFloat(pct6) >= 10 ? '#B91C1C' : parseFloat(pct6) >= 5 ? '#B45309' : '#0F766E';
+  } else { el6.textContent = '—'; el6.style.background = ''; el6.style.color = ''; }
+  update();
+}
+
+function calcProtein() {
+  const prot = parseFloat(document.getElementById('q-prot').value);
+  const w    = parseFloat(document.getElementById('q-wt').value);
+  document.getElementById('prot-val').textContent =
+    (prot > 0 && w > 0) ? (prot / w).toFixed(2) + ' g/kg/day' : '—';
+}
+
+// ── Progress ────────────────────────────────
+function update() {
+  const pill = document.getElementById('progress-pill');
+  const total = countRequired();
+  const done  = countDone();
+  pill.textContent = done + ' / ' + total + ' 必填';
+}
+
+function countRequired() { return 7; } // mrn, name, date, visit, rd, ht, wt, sga-final = 8 but SGA-final counted separately
+function countDone() {
+  let n = 0;
+  ['q-mrn','q-name','q-ht','q-wt'].forEach(id => { if (document.getElementById(id)?.value) n++; });
+  ['q-date','q-visit','q-rd','q-sga-final'].forEach(id => {
+    const el = document.getElementById(id);
+    if (id === 'q-date') { if (document.getElementById('q-date').value) n++; }
+    else if (radioVals[id] || sgaVals[id]) n++;
+  });
+  return n;
+}
+
+// ── Collect ─────────────────────────────────
+function collectData() {
+  const h   = parseFloat(document.getElementById('q-ht').value);
+  const w   = parseFloat(document.getElementById('q-wt').value);
+  const w3  = parseFloat(document.getElementById('q-wt3m').value);
+  const prot = parseFloat(document.getElementById('q-prot').value);
+  const rdName = radioVals['q-rd'] === '其他'
+    ? document.getElementById('q-rd-other').value
+    : (radioVals['q-rd'] || '');
+  return {
+    病歷號: document.getElementById('q-mrn').value,
+    姓名: document.getElementById('q-name').value,
+    性別: radioVals['q-sex'] || '',
+    年齡: document.getElementById('q-age').value,
+    收案日期: document.getElementById('q-date').value,
+    收案次別: radioVals['q-visit'] || '',
+    填寫者: rdName,
+    身高_cm: h || '',
+    目前體重_kg: w || '',
+    BMI: (h > 0 && w > 0) ? (w/((h/100)**2)).toFixed(1) : '',
+    三月前體重_kg: document.getElementById('q-wt3m').value,
+    六月前體重_kg: document.getElementById('q-wt6m').value,
+    體重流失率_3M: (w3 > 0 && w > 0) ? ((w3-w)/w3*100).toFixed(1) : '',
+    體重流失率_6M: (() => { const w6=parseFloat(document.getElementById('q-wt6m').value); return (w6>0&&w>0)?((w6-w)/w6*100).toFixed(1):''; })(),
+    BIA測量時段: radioVals['q-biatime'] || '',
+    SMI_kg_m2: document.getElementById('q-smi').value,
+    PBF_pct: document.getElementById('q-pbf').value,
+    握力_kg: document.getElementById('q-grip').value,
+    握力判讀: document.getElementById('grip-val').textContent.replace('⚠️ ','').replace('✓ ',''),
+    SGA_S1_6M體重: sgaVals['q-s1a'] || '',
+    SGA_S1_2週趨勢: sgaVals['q-s1b'] || '',
+    SGA_S2_飲食狀況: sgaVals['q-s2a'] || '',
+    SGA_S2_趨勢: sgaVals['q-s2b'] || '',
+    SGA_S3_症狀評級: sgaVals['q-s3a'] || '',
+    SGA_S3_症狀細項: [...(checkVals['q-s3b']||[]), ...(checkVals['q-s3b']?.includes('其他') && document.getElementById('q-gi-other').value ? ['其他：'+document.getElementById('q-gi-other').value] : [])].filter(v=>v!=='其他').join('；'),
+    SGA_S4_功能狀態: sgaVals['q-s4a'] || '',
+    SGA_S4_趨勢: sgaVals['q-s4b'] || '',
+    SGA_S5_皮下脂肪: sgaVals['q-s5fat'] || '',
+    SGA_S5_肌肉消耗: sgaVals['q-s5mus'] || '',
+    SGA_S5_水腫: sgaVals['q-s5edm'] || '',
+    SGA_S5_腹水: sgaVals['q-s5asc'] || '',
+    SGA最終分級: sgaVals['q-sga-final'] || '',
+    MEDAS_Q1: medasState[0] ?? '', MEDAS_Q2: medasState[1] ?? '', MEDAS_Q3: medasState[2] ?? '',
+    MEDAS_Q4: medasState[3] ?? '', MEDAS_Q5: medasState[4] ?? '', MEDAS_Q6: medasState[5] ?? '',
+    MEDAS_Q7: medasState[6] ?? '', MEDAS_Q8: medasState[7] ?? '', MEDAS_Q9: medasState[8] ?? '',
+    MEDAS_Q10: medasState[9] ?? '', MEDAS_Q11: medasState[10] ?? '', MEDAS_Q12: medasState[11] ?? '',
+    MEDAS_Q13: medasState[12] ?? '', MEDAS_Q14: medasState[13] ?? '',
+    MEDAS總分: medasState.filter(v => v === 1).length,
+    
+    熱量_kcal: document.getElementById('q-kcal').value,
+    蛋白質_g: document.getElementById('q-prot').value,
+    蛋白質_gkg: (prot > 0 && w > 0) ? (prot/w).toFixed(2) : '',
+    是否衛教: radioVals['q-edu'] || '',
+    衛教內容: (checkVals['q-edu-content'] || []).join('；'),
+    衛教方式: (checkVals['q-edu-method'] || []).join('；'),
+    衛教觸發: (checkVals['q-edu-reason'] || []).join('；'),
+    備註: document.getElementById('q-note').value,
+    填寫時間: new Date().toLocaleString('zh-TW'),
+  };
+}
+
+// ── Validate ────────────────────────────────
+function validate() {
+  const msgs = [];
+  if (!document.getElementById('q-mrn').value)  msgs.push('病歷號');
+  if (!document.getElementById('q-name').value) msgs.push('姓名');
+  if (!document.getElementById('q-date').value) msgs.push('收案日期');
+  if (!radioVals['q-visit'])    msgs.push('收案次別');
+  if (!radioVals['q-rd'])       msgs.push('填寫者');
+  if (radioVals['q-rd'] === '其他' && !document.getElementById('q-rd-other').value) msgs.push('填寫者姓名');
+  if (!document.getElementById('q-ht').value) msgs.push('身高');
+  if (!document.getElementById('q-wt').value) msgs.push('目前體重');
+  if (!sgaVals['q-sga-final'])  msgs.push('SGA 最終分級');
+  return msgs;
+}
+
+// ── Submit ──────────────────────────────────
+async function submitForm() {
+  const missing = validate();
+  if (missing.length > 0) {
+    document.getElementById('submit-msg').textContent = '請填寫必填欄位：' + missing.join('、');
+    return;
+  }
+  document.getElementById('submit-msg').textContent = '';
+  const btn = document.getElementById('btn-submit');
+  btn.disabled = true; btn.textContent = '送出中…';
+
+  const data = collectData();
+
+  if (SCRIPT_URL === 'YOUR_GOOGLE_APPS_SCRIPT_URL_HERE') {
+    console.log('📋 資料（測試模式）：', data);
+    setTimeout(() => {
+      document.getElementById('success-detail').textContent = '（測試模式：尚未連接 Google Sheets）';
+      document.getElementById('success-overlay').classList.add('show');
+      btn.disabled = false; btn.textContent = '送出本筆資料';
+    }, 600);
+    return;
+  }
+
+  try {
+    const res = await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(data) });
+    const json = await res.json();
+    if (json.result === 'success') {
+      document.getElementById('success-detail').textContent = '本筆資料已成功寫入 Google Sheets！';
+      document.getElementById('success-overlay').classList.add('show');
+    } else { throw new Error(json.error); }
+  } catch(e) {
+    showToast('送出失敗：' + e.message);
+  }
+  btn.disabled = false; btn.textContent = '送出本筆資料';
+}
+
+// ── Reset ───────────────────────────────────
+function resetForm() {
+  // 1. 關閉成功視窗
+  document.getElementById('success-overlay').classList.remove('show');
+
+  // 2. 清空所有 input / textarea
+  document.querySelectorAll('input, textarea').forEach(el => el.value = '');
+
+  // 3. 清空所有選項按鈕狀態
+  document.querySelectorAll('.opt-btn').forEach(el => el.className = 'opt-btn');
+
+  // 4. 清空所有 state
+  Object.keys(sgaVals).forEach(k => delete sgaVals[k]);
+  Object.keys(radioVals).forEach(k => delete radioVals[k]);
+  Object.keys(checkVals).forEach(k => delete checkVals[k]);
+  medasState.fill(null);
+
+  // 5. 隱藏條件區塊
+  document.getElementById('section-24hr').style.display  = 'none';
+  document.getElementById('section-edu').style.display   = 'none';
+  document.getElementById('other-rd-wrap').style.display = 'none';
+  document.getElementById('gi-other-wrap').style.display = 'none';
+
+  // 6. 清空自動計算欄位
+  document.getElementById('bmi-val').textContent = '—';
+  document.getElementById('bmi-val').style.background = '';
+  document.getElementById('bmi-val').style.color = '';
+  ['wl-val','wl6-val','prot-val','grip-val'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) { el.textContent = '—'; el.style.background = ''; el.style.color = ''; }
+  });
+
+  // 7. 重設 MEDAS 分數卡片
+  document.getElementById('medas-total').textContent    = '0';
+  document.getElementById('medas-done').textContent     = '0/14';
+  document.getElementById('medas-bar').style.width      = '0%';
+  document.getElementById('medas-bar').style.background = '#E24B4A';
+  const lvl = document.getElementById('medas-level');
+  lvl.textContent = '未完成';
+  lvl.style.cssText = 'background:#FEE2E2;color:#B91C1C;font-size:13px;font-weight:600;padding:4px 12px;border-radius:6px;text-align:center;';
+
+  // 8. 重建 MEDAS 題目（medasState 已是 null，buildMedas 會產生乾淨按鈕）
+  buildMedas();
+
+  // 9. 其他
+  document.getElementById('submit-msg').textContent = '';
+  document.getElementById('q-date').value = new Date().toISOString().split('T')[0];
+  update();
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// ── Init ────────────────────────────────────
+buildMedas();
+document.getElementById('q-date').value = new Date().toISOString().split('T')[0];
+update();
+</script>
+</body>
+</html>
