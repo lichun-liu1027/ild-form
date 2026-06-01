@@ -270,7 +270,7 @@
         <div class="input-unit"><input type="number" id="q-grip" placeholder="kg" step="0.1" oninput="calcGrip()"><span class="unit">kg</span></div>
       </div>
       <div class="field">
-        <div class="field-label">握力判讀（AWGS 2019）</div>
+        <div class="field-label">握力判讀（AWGS 2025）</div>
         <div class="computed-val" id="grip-val">—</div>
       </div>
     </div>
@@ -496,6 +496,16 @@
       ・<strong>激烈活動</strong>：會讓您呼吸急促、心跳加速很多（如跑步、快速騎車、搬重物、重量訓練感覺很喘）<br>
       ・<strong>中等強度</strong>：會讓您呼吸稍微加快（如快走、一般騎車、拖地；輕度重訓算此類）<br>
       ・<strong>走路</strong>：單獨計算，不含在以上兩項
+    </div>
+
+    <!-- 代表性確認 -->
+    <div class="field">
+      <div class="field-label">您過去7天的身體活動，與過去3個月比較起來？</div>
+      <div class="options row" id="q-ipaq-rep">
+        <div class="opt-btn" onclick="selectRadio('q-ipaq-rep',this,'比較多')"><div class="opt-indicator"></div>比較多</div>
+        <div class="opt-btn" onclick="selectRadio('q-ipaq-rep',this,'差不多')"><div class="opt-indicator"></div>差不多</div>
+        <div class="opt-btn" onclick="selectRadio('q-ipaq-rep',this,'比較少')"><div class="opt-indicator"></div>比較少</div>
+      </div>
     </div>
 
     <!-- 激烈活動 -->
@@ -768,15 +778,21 @@ function showOtherRD(show) {
 function calcGrip() {
   const grip = parseFloat(document.getElementById('q-grip').value);
   const sex  = radioVals['q-sex'];
+  const age  = parseFloat(document.getElementById('q-age').value);
   const el   = document.getElementById('grip-val');
   if (!grip) { el.textContent = '—'; el.style.background = ''; el.style.color = ''; return; }
   if (!sex)  { el.textContent = '請先填寫性別'; el.style.background = '#FEF3C7'; el.style.color = '#B45309'; return; }
-  const cutoff = sex === '男' ? 28 : 18;
+  if (!age)  { el.textContent = '請先填寫年齡'; el.style.background = '#FEF3C7'; el.style.color = '#B45309'; return; }
+  // AWGS 2025：<65歲 男<34/女<20；≥65歲 男<28/女<18
+  const cutoff = age >= 65
+    ? (sex === '男' ? 28 : 18)
+    : (sex === '男' ? 34 : 20);
+  const ageGroup = age >= 65 ? '≥65歲' : '<65歲';
   if (grip < cutoff) {
-    el.textContent  = '⚠️ 肌力低下（< ' + cutoff + ' kg）';
+    el.textContent  = '⚠️ 肌力低下（' + ageGroup + '，< ' + cutoff + ' kg）';
     el.style.background = '#FEE2E2'; el.style.color = '#B91C1C';
   } else {
-    el.textContent  = '✓ 正常（≥ ' + cutoff + ' kg）';
+    el.textContent  = '✓ 正常（' + ageGroup + '，≥ ' + cutoff + ' kg）';
     el.style.background = '#DCFCE7'; el.style.color = '#15803D';
   }
   update();
@@ -903,7 +919,7 @@ function collectData() {
     SMI_kg_m2: document.getElementById('q-smi').value,
     PBF_pct: document.getElementById('q-pbf').value,
     握力_kg: document.getElementById('q-grip').value,
-    握力判讀: document.getElementById('grip-val').textContent.replace('⚠️ ','').replace('✓ ',''),
+    握力判讀_AWGS2025: document.getElementById('grip-val').textContent.replace('⚠️ ','').replace('✓ ',''),
     SGA_S1_6M體重: sgaVals['q-s1a'] || '',
     SGA_S1_2週趨勢: sgaVals['q-s1b'] || '',
     SGA_S2_飲食狀況: sgaVals['q-s2a'] || '',
@@ -927,6 +943,7 @@ function collectData() {
     熱量_kcal: document.getElementById('q-kcal').value,
     蛋白質_g: document.getElementById('q-prot').value,
     蛋白質_gkg: (prot > 0 && w > 0) ? (prot/w).toFixed(2) : '',
+    IPAQ_活動代表性: radioVals['q-ipaq-rep'] || '',
     IPAQ_激烈活動_天: document.getElementById('q-ipaq-v1').value,
     IPAQ_激烈活動_分鐘: document.getElementById('q-ipaq-v2').value,
     IPAQ_中等活動_天: document.getElementById('q-ipaq-m1').value,
