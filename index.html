@@ -187,6 +187,7 @@
         <div class="options row" id="q-visit">
           <div class="opt-btn" onclick="selectRadio('q-visit',this,'初次收案')"><div class="opt-indicator"></div>初次收案</div>
           <div class="opt-btn" onclick="selectRadio('q-visit',this,'第2次')"><div class="opt-indicator"></div>第2次</div>
+          <div class="opt-btn" onclick="selectRadio('q-visit',this,'第3次')"><div class="opt-indicator"></div>第3次</div>
         </div>
       </div>
     </div>
@@ -485,10 +486,98 @@
 </div>
 
 <!-- ══════════════════════════════════════════
-  ⑥ 衛教紀錄
+  ⑥ 運動習慣（IPAQ 短版）
 ══════════════════════════════════════════ -->
 <div class="section">
-  <div class="section-header"><div class="num">⑥</div><h2>營養衛教紀錄</h2></div>
+  <div class="section-header"><div class="num">⑥</div><h2>運動習慣（IPAQ 短版）</h2></div>
+  <div class="section-body">
+    <div style="background:#F0F9FF;border:1.5px solid #5EEAD4;border-radius:8px;padding:10px 14px;margin-bottom:1rem;font-size:13px;color:#0F766E;line-height:1.7;">
+      <strong>說明：</strong>以下詢問您<strong>過去7天內</strong>的身體活動狀況，包含工作、家務、交通及休閒時的活動。<br>
+      ・<strong>激烈活動</strong>：會讓您呼吸急促、心跳加速很多（如跑步、快速騎車、搬重物、重量訓練感覺很喘）<br>
+      ・<strong>中等強度</strong>：會讓您呼吸稍微加快（如快走、一般騎車、拖地；輕度重訓算此類）<br>
+      ・<strong>走路</strong>：單獨計算，不含在以上兩項
+    </div>
+
+    <!-- 激烈活動 -->
+    <div class="sub-title">激烈身體活動</div>
+    <div class="field-row">
+      <div class="field">
+        <div class="field-label">過去7天，幾天有做激烈活動？</div>
+        <div class="input-unit">
+          <input type="number" id="q-ipaq-v1" placeholder="天" min="0" max="7" oninput="calcIPAQ()">
+          <span class="unit">天（0–7）</span>
+        </div>
+      </div>
+      <div class="field">
+        <div class="field-label">這幾天每天做幾分鐘？</div>
+        <div class="input-unit">
+          <input type="number" id="q-ipaq-v2" placeholder="分鐘" min="0" oninput="calcIPAQ()">
+          <span class="unit">分鐘/天</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 中等強度 -->
+    <div class="sub-title" style="margin-top:1rem;">中等強度活動</div>
+    <div class="field-row">
+      <div class="field">
+        <div class="field-label">過去7天，幾天有做中等強度活動？</div>
+        <div class="input-unit">
+          <input type="number" id="q-ipaq-m1" placeholder="天" min="0" max="7" oninput="calcIPAQ()">
+          <span class="unit">天（0–7）</span>
+        </div>
+      </div>
+      <div class="field">
+        <div class="field-label">這幾天每天做幾分鐘？</div>
+        <div class="input-unit">
+          <input type="number" id="q-ipaq-m2" placeholder="分鐘" min="0" oninput="calcIPAQ()">
+          <span class="unit">分鐘/天</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 走路 -->
+    <div class="sub-title" style="margin-top:1rem;">走路</div>
+    <div class="field-row">
+      <div class="field">
+        <div class="field-label">過去7天，幾天走路超過10分鐘？</div>
+        <div class="input-unit">
+          <input type="number" id="q-ipaq-w1" placeholder="天" min="0" max="7" oninput="calcIPAQ()">
+          <span class="unit">天（0–7）</span>
+        </div>
+      </div>
+      <div class="field">
+        <div class="field-label">這幾天每天走路幾分鐘？</div>
+        <div class="input-unit">
+          <input type="number" id="q-ipaq-w2" placeholder="分鐘" min="0" oninput="calcIPAQ()">
+          <span class="unit">分鐘/天</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 坐著時間 -->
+    <div class="sub-title" style="margin-top:1rem;">靜態時間</div>
+    <div class="field">
+      <div class="field-label">過去7天，平均每天坐著的時間（含工作、用餐、看電視、使用手機等）</div>
+      <div class="input-unit" style="max-width:240px;">
+        <input type="number" id="q-ipaq-s" placeholder="分鐘" min="0" oninput="calcIPAQ()">
+        <span class="unit">分鐘/天</span>
+      </div>
+    </div>
+
+    <!-- 自動計算結果 -->
+    <div class="field" style="margin-top:1rem;">
+      <div class="field-label">身體活動量（自動計算）</div>
+      <div class="computed-val" id="ipaq-val">—</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+  ⑦ 衛教紀錄
+══════════════════════════════════════════ -->
+<div class="section">
+  <div class="section-header"><div class="num">⑦</div><h2>營養衛教紀錄</h2></div>
   <div class="section-body">
     <div class="field">
       <div class="field-label">本次是否給予衛教？</div>
@@ -742,6 +831,30 @@ function calcProtein() {
     (prot > 0 && w > 0) ? (prot / w).toFixed(2) + ' g/kg/day' : '—';
 }
 
+function calcIPAQ() {
+  const v1 = parseFloat(document.getElementById('q-ipaq-v1').value) || 0;
+  const v2 = parseFloat(document.getElementById('q-ipaq-v2').value) || 0;
+  const m1 = parseFloat(document.getElementById('q-ipaq-m1').value) || 0;
+  const m2 = parseFloat(document.getElementById('q-ipaq-m2').value) || 0;
+  const w1 = parseFloat(document.getElementById('q-ipaq-w1').value) || 0;
+  const w2 = parseFloat(document.getElementById('q-ipaq-w2').value) || 0;
+  const el = document.getElementById('ipaq-val');
+  if (!v1 && !m1 && !w1) { el.textContent = '—'; el.style.background = ''; el.style.color = ''; return; }
+  // MET-min/week: 激烈×8.0, 中等×4.0, 走路×3.3
+  const met = (v1 * v2 * 8.0) + (m1 * m2 * 4.0) + (w1 * w2 * 3.3);
+  let level, bg, color;
+  if (met >= 1500 || (v1 >= 3 && v1*v2*8.0 >= 1500)) {
+    level = '高（High）'; bg = '#DCFCE7'; color = '#15803D';
+  } else if (met >= 600) {
+    level = '中（Moderate）'; bg = '#FEF3C7'; color = '#B45309';
+  } else {
+    level = '低（Low）'; bg = '#FEE2E2'; color = '#B91C1C';
+  }
+  el.textContent = Math.round(met) + ' MET-min/週　' + level;
+  el.style.background = bg; el.style.color = color;
+  update();
+}
+
 // ── Progress ────────────────────────────────
 function update() {
   const pill = document.getElementById('progress-pill');
@@ -814,6 +927,24 @@ function collectData() {
     熱量_kcal: document.getElementById('q-kcal').value,
     蛋白質_g: document.getElementById('q-prot').value,
     蛋白質_gkg: (prot > 0 && w > 0) ? (prot/w).toFixed(2) : '',
+    IPAQ_激烈活動_天: document.getElementById('q-ipaq-v1').value,
+    IPAQ_激烈活動_分鐘: document.getElementById('q-ipaq-v2').value,
+    IPAQ_中等活動_天: document.getElementById('q-ipaq-m1').value,
+    IPAQ_中等活動_分鐘: document.getElementById('q-ipaq-m2').value,
+    IPAQ_走路_天: document.getElementById('q-ipaq-w1').value,
+    IPAQ_走路_分鐘: document.getElementById('q-ipaq-w2').value,
+    IPAQ_坐著_分鐘: document.getElementById('q-ipaq-s').value,
+    IPAQ_MET_min_週: (() => {
+      const v1=parseFloat(document.getElementById('q-ipaq-v1').value)||0;
+      const v2=parseFloat(document.getElementById('q-ipaq-v2').value)||0;
+      const m1=parseFloat(document.getElementById('q-ipaq-m1').value)||0;
+      const m2=parseFloat(document.getElementById('q-ipaq-m2').value)||0;
+      const w1=parseFloat(document.getElementById('q-ipaq-w1').value)||0;
+      const w2=parseFloat(document.getElementById('q-ipaq-w2').value)||0;
+      const met=(v1*v2*8.0)+(m1*m2*4.0)+(w1*w2*3.3);
+      return (v1||m1||w1) ? Math.round(met) : '';
+    })(),
+    IPAQ_活動等級: document.getElementById('ipaq-val').textContent.includes('高') ? '高' : document.getElementById('ipaq-val').textContent.includes('中') ? '中' : document.getElementById('ipaq-val').textContent.includes('低') ? '低' : '',
     是否衛教: radioVals['q-edu'] || '',
     衛教內容: (checkVals['q-edu-content'] || []).join('；'),
     衛教方式: (checkVals['q-edu-method'] || []).join('；'),
@@ -901,7 +1032,7 @@ function resetForm() {
   document.getElementById('bmi-val').textContent = '—';
   document.getElementById('bmi-val').style.background = '';
   document.getElementById('bmi-val').style.color = '';
-  ['wl-val','wl6-val','prot-val','grip-val'].forEach(id => {
+  ['wl-val','wl6-val','prot-val','grip-val','ipaq-val'].forEach(id => {
     const el = document.getElementById(id);
     if (el) { el.textContent = '—'; el.style.background = ''; el.style.color = ''; }
   });
