@@ -160,6 +160,10 @@
         <input type="text" id="q-mrn" placeholder="病歷號" oninput="update()">
       </div>
       <div class="field">
+        <div class="field-label">研究編號</div>
+        <input type="text" id="q-rid" placeholder="ILD-001" oninput="update()">
+      </div>
+      <div class="field">
         <div class="field-label">姓名 <span class="req">必填</span></div>
         <input type="text" id="q-name" placeholder="病人姓名" oninput="update()">
       </div>
@@ -471,14 +475,34 @@
     <div class="field-row3">
         <div class="field">
           <div class="field-label">熱量攝取</div>
-          <div class="input-unit"><input type="number" id="q-kcal" placeholder="kcal" oninput="calcProtein()"><span class="unit">kcal/day</span></div>
+          <div class="input-unit"><input type="number" id="q-kcal" placeholder="kcal" oninput="calcDietGoal()"><span class="unit">kcal/day</span></div>
         </div>
         <div class="field">
-          <div class="field-label">蛋白質</div>
-          <div class="input-unit"><input type="number" id="q-prot" placeholder="g" oninput="calcProtein()"><span class="unit">g/day</span></div>
+          <div class="field-label">熱量需求</div>
+          <div class="input-unit"><input type="number" id="q-kcal-goal" placeholder="kcal" oninput="calcDietGoal()"><span class="unit">kcal/day</span></div>
         </div>
         <div class="field">
-          <div class="field-label">蛋白質（自動算）</div>
+          <div class="field-label">熱量達成率（自動算）</div>
+          <div class="computed-val" id="kcal-rate-val">—</div>
+        </div>
+    </div>
+    <div class="field-row3" style="margin-top:0.75rem;">
+        <div class="field">
+          <div class="field-label">蛋白質攝取</div>
+          <div class="input-unit"><input type="number" id="q-prot" placeholder="g" oninput="calcDietGoal()"><span class="unit">g/day</span></div>
+        </div>
+        <div class="field">
+          <div class="field-label">蛋白質需求</div>
+          <div class="input-unit"><input type="number" id="q-prot-goal" placeholder="g" oninput="calcDietGoal()"><span class="unit">g/day</span></div>
+        </div>
+        <div class="field">
+          <div class="field-label">蛋白質達成率（自動算）</div>
+          <div class="computed-val" id="prot-rate-val">—</div>
+        </div>
+    </div>
+    <div class="field-row" style="margin-top:0.75rem;">
+        <div class="field">
+          <div class="field-label">蛋白質 g/kg/day（自動算）</div>
           <div class="computed-val" id="prot-val">—</div>
         </div>
     </div>
@@ -840,11 +864,29 @@ function calcWeight() {
   update();
 }
 
-function calcProtein() {
+function calcDietGoal() {
+  const kcal = parseFloat(document.getElementById('q-kcal').value);
+  const kcalGoal = parseFloat(document.getElementById('q-kcal-goal').value);
   const prot = parseFloat(document.getElementById('q-prot').value);
-  const w    = parseFloat(document.getElementById('q-wt').value);
+  const protGoal = parseFloat(document.getElementById('q-prot-goal').value);
+  const w = parseFloat(document.getElementById('q-wt').value);
+
+  // 熱量達成率
+  const kcalEl = document.getElementById('kcal-rate-val');
+  if (kcal > 0 && kcalGoal > 0) {
+    kcalEl.textContent = (kcal / kcalGoal * 100).toFixed(1) + '%';
+  } else { kcalEl.textContent = '—'; }
+
+  // 蛋白質達成率
+  const protRateEl = document.getElementById('prot-rate-val');
+  if (prot > 0 && protGoal > 0) {
+    protRateEl.textContent = (prot / protGoal * 100).toFixed(1) + '%';
+  } else { protRateEl.textContent = '—'; }
+
+  // 蛋白質 g/kg/day
   document.getElementById('prot-val').textContent =
     (prot > 0 && w > 0) ? (prot / w).toFixed(2) + ' g/kg/day' : '—';
+  update();
 }
 
 function calcIPAQ() {
@@ -925,7 +967,7 @@ function collectData() {
     ? document.getElementById('q-rd-other').value
     : (radioVals['q-rd'] || '');
   return {
-    病歷號: document.getElementById('q-mrn').value,
+    研究編號: document.getElementById('q-rid').value,
     姓名: document.getElementById('q-name').value,
     性別: radioVals['q-sex'] || '',
     年齡: document.getElementById('q-age').value,
@@ -965,7 +1007,11 @@ function collectData() {
     MEDAS總分: medasState.filter(v => v === 1).length,
     
     熱量_kcal: document.getElementById('q-kcal').value,
+    熱量需求_kcal: document.getElementById('q-kcal-goal').value,
+    熱量達成率: document.getElementById('kcal-rate-val').textContent,
     蛋白質_g: document.getElementById('q-prot').value,
+    蛋白質需求_g: document.getElementById('q-prot-goal').value,
+    蛋白質達成率: document.getElementById('prot-rate-val').textContent,
     蛋白質_gkg: (prot > 0 && w > 0) ? (prot/w).toFixed(2) : '',
     IPAQ_活動代表性: radioVals['q-ipaq-rep'] || '',
     IPAQ_激烈活動_天: document.getElementById('q-ipaq-v1').value,
@@ -1077,7 +1123,7 @@ function resetForm() {
   document.getElementById('bmi-val').textContent = '—';
   document.getElementById('bmi-val').style.background = '';
   document.getElementById('bmi-val').style.color = '';
-  ['wl-val','wl6-val','prot-val','grip-val','ipaq-val'].forEach(id => {
+  ['wl-val','wl6-val','prot-val','prot-rate-val','kcal-rate-val','grip-val','ipaq-val'].forEach(id => {
     const el = document.getElementById(id);
     if (el) { el.textContent = '—'; el.style.background = ''; el.style.color = ''; }
   });
