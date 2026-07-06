@@ -160,10 +160,6 @@
         <input type="text" id="q-mrn" placeholder="病歷號" oninput="update()">
       </div>
       <div class="field">
-        <div class="field-label">研究編號</div>
-        <input type="text" id="q-rid" placeholder="ILD-001" oninput="update()">
-      </div>
-      <div class="field">
         <div class="field-label">姓名 <span class="req">必填</span></div>
         <input type="text" id="q-name" placeholder="病人姓名" oninput="update()">
       </div>
@@ -200,6 +196,7 @@
       <div class="options row" id="q-rd">
         <div class="opt-btn" onclick="selectRadio('q-rd',this,'劉俐君');showOtherRD(false)"><div class="opt-indicator"></div>劉俐君</div>
         <div class="opt-btn" onclick="selectRadio('q-rd',this,'廖瑞華');showOtherRD(false)"><div class="opt-indicator"></div>廖瑞華</div>
+        <div class="opt-btn" onclick="selectRadio('q-rd',this,'黃湘婕');showOtherRD(false)"><div class="opt-indicator"></div>黃湘婕</div>
         <div class="opt-btn" onclick="selectRadio('q-rd',this,'其他');showOtherRD(true)"><div class="opt-indicator"></div>其他</div>
       </div>
       <div id="other-rd-wrap" style="display:none;margin-top:8px;">
@@ -475,34 +472,14 @@
     <div class="field-row3">
         <div class="field">
           <div class="field-label">熱量攝取</div>
-          <div class="input-unit"><input type="number" id="q-kcal" placeholder="kcal" oninput="calcDietGoal()"><span class="unit">kcal/day</span></div>
+          <div class="input-unit"><input type="number" id="q-kcal" placeholder="kcal" oninput="calcProtein()"><span class="unit">kcal/day</span></div>
         </div>
         <div class="field">
-          <div class="field-label">熱量需求</div>
-          <div class="input-unit"><input type="number" id="q-kcal-goal" placeholder="kcal" oninput="calcDietGoal()"><span class="unit">kcal/day</span></div>
+          <div class="field-label">蛋白質</div>
+          <div class="input-unit"><input type="number" id="q-prot" placeholder="g" oninput="calcProtein()"><span class="unit">g/day</span></div>
         </div>
         <div class="field">
-          <div class="field-label">熱量達成率（自動算）</div>
-          <div class="computed-val" id="kcal-rate-val">—</div>
-        </div>
-    </div>
-    <div class="field-row3" style="margin-top:0.75rem;">
-        <div class="field">
-          <div class="field-label">蛋白質攝取</div>
-          <div class="input-unit"><input type="number" id="q-prot" placeholder="g" oninput="calcDietGoal()"><span class="unit">g/day</span></div>
-        </div>
-        <div class="field">
-          <div class="field-label">蛋白質需求</div>
-          <div class="input-unit"><input type="number" id="q-prot-goal" placeholder="g" oninput="calcDietGoal()"><span class="unit">g/day</span></div>
-        </div>
-        <div class="field">
-          <div class="field-label">蛋白質達成率（自動算）</div>
-          <div class="computed-val" id="prot-rate-val">—</div>
-        </div>
-    </div>
-    <div class="field-row" style="margin-top:0.75rem;">
-        <div class="field">
-          <div class="field-label">蛋白質 g/kg/day（自動算）</div>
+          <div class="field-label">蛋白質（自動算）</div>
           <div class="computed-val" id="prot-val">—</div>
         </div>
     </div>
@@ -688,7 +665,7 @@ const checkVals = {};
 const medasState = new Array(14).fill(null);
 
 const medasQs = [
-  { t: '橄欖油為主要烹飪用油', h: '炒菜、拌沙拉、沾麵包等用油，以橄欖油為主即符合' },
+  { t: '橄欖油為主要烹飪用油', h: '炒菜、拌沙拉、沾麵包等用油，以橄欖油為主即符合；若多數正餐為外食、少有機會自煮，則判不符合' },
   { t: '每天使用橄欖油 ≥ 4 湯匙', h: '1 湯匙 ≈ 15ml，4 湯匙 ≈ 60ml（含烹飪及調味用）' },
   { t: '每天蔬菜 ≥ 2 份', h: '1 份 ≈ 200g 生重（約 1 大碗熟菜）' },
   { t: '每天水果 ≥ 3 份', h: '1 份 ≈ 150–200g（約 1 個中型水果）；不含果汁' },
@@ -700,7 +677,7 @@ const medasQs = [
   { t: '每週甜點／糕點 < 3 份', h: '蛋糕、餅乾、糖果、冰淇淋等甜食；1 份 ≈ 1 小塊或 1 包零食' },
   { t: '每週堅果 ≥ 3 份', h: '1 份 ≈ 30g（約 1 小把）；核桃、杏仁、腰果等，選原味無鹽為佳' },
   { t: '以禽肉取代紅肉', h: '禽肉指雞、鴨、鵝；主要肉類來源以禽肉為主、紅肉為輔即符合' },
-  { t: '每週以番茄醬／大蒜／洋蔥料理蔬菜 ≥ 2 次', h: '以這些食材為基底烹煮，例如番茄炒蛋、蒜炒青菜、洋蔥燉菜等' },
+  { t: '每週以番茄醬／大蒜／洋蔥料理蔬菜 ≥ 2 次', h: '需番茄與大蒜／洋蔥「同時」入菜作為烹調基底（如番茄炒蒜末蔬菜），單一食材（僅蒜頭爆香或僅番茄）不算' },
   { t: '飲酒量：女性每天 ≥ 1 杯、男性每天 ≥ 2 杯葡萄酒', h: '1 杯 ≈ 150ml 葡萄酒；完全不飲酒或飲酒未達上述量 → 不符合（0分）；此題反映地中海飲食文化，如實填答即可' },
 ];
 
@@ -864,29 +841,11 @@ function calcWeight() {
   update();
 }
 
-function calcDietGoal() {
-  const kcal = parseFloat(document.getElementById('q-kcal').value);
-  const kcalGoal = parseFloat(document.getElementById('q-kcal-goal').value);
+function calcProtein() {
   const prot = parseFloat(document.getElementById('q-prot').value);
-  const protGoal = parseFloat(document.getElementById('q-prot-goal').value);
-  const w = parseFloat(document.getElementById('q-wt').value);
-
-  // 熱量達成率
-  const kcalEl = document.getElementById('kcal-rate-val');
-  if (kcal > 0 && kcalGoal > 0) {
-    kcalEl.textContent = (kcal / kcalGoal * 100).toFixed(1) + '%';
-  } else { kcalEl.textContent = '—'; }
-
-  // 蛋白質達成率
-  const protRateEl = document.getElementById('prot-rate-val');
-  if (prot > 0 && protGoal > 0) {
-    protRateEl.textContent = (prot / protGoal * 100).toFixed(1) + '%';
-  } else { protRateEl.textContent = '—'; }
-
-  // 蛋白質 g/kg/day
+  const w    = parseFloat(document.getElementById('q-wt').value);
   document.getElementById('prot-val').textContent =
     (prot > 0 && w > 0) ? (prot / w).toFixed(2) + ' g/kg/day' : '—';
-  update();
 }
 
 function calcIPAQ() {
@@ -967,7 +926,6 @@ function collectData() {
     ? document.getElementById('q-rd-other').value
     : (radioVals['q-rd'] || '');
   return {
-    研究編號: document.getElementById('q-rid').value,
     病歷號: document.getElementById('q-mrn').value,
     姓名: document.getElementById('q-name').value,
     性別: radioVals['q-sex'] || '',
@@ -1008,11 +966,7 @@ function collectData() {
     MEDAS總分: medasState.filter(v => v === 1).length,
     
     熱量_kcal: document.getElementById('q-kcal').value,
-    熱量需求_kcal: document.getElementById('q-kcal-goal').value,
-    熱量達成率: document.getElementById('kcal-rate-val').textContent,
     蛋白質_g: document.getElementById('q-prot').value,
-    蛋白質需求_g: document.getElementById('q-prot-goal').value,
-    蛋白質達成率: document.getElementById('prot-rate-val').textContent,
     蛋白質_gkg: (prot > 0 && w > 0) ? (prot/w).toFixed(2) : '',
     IPAQ_活動代表性: radioVals['q-ipaq-rep'] || '',
     IPAQ_激烈活動_天: document.getElementById('q-ipaq-v1').value,
@@ -1124,7 +1078,7 @@ function resetForm() {
   document.getElementById('bmi-val').textContent = '—';
   document.getElementById('bmi-val').style.background = '';
   document.getElementById('bmi-val').style.color = '';
-  ['wl-val','wl6-val','prot-val','prot-rate-val','kcal-rate-val','grip-val','ipaq-val'].forEach(id => {
+  ['wl-val','wl6-val','prot-val','grip-val','ipaq-val'].forEach(id => {
     const el = document.getElementById(id);
     if (el) { el.textContent = '—'; el.style.background = ''; el.style.color = ''; }
   });
