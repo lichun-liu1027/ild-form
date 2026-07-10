@@ -874,12 +874,12 @@ function calcDietGoal() {
   // 熱量達成率
   const kcalEl = document.getElementById('kcal-rate-val');
   if (kcal > 0 && kcalGoal > 0) {
-    kcalEl.textContent = (kcal / kcalGoal * 100).toFixed(1) + '%';
+    kcalEl.textContent = Math.round(kcal / kcalGoal * 100) + '%';
   } else { kcalEl.textContent = '—'; }
   // 蛋白質達成率
   const protRateEl = document.getElementById('prot-rate-val');
   if (prot > 0 && protGoal > 0) {
-    protRateEl.textContent = (prot / protGoal * 100).toFixed(1) + '%';
+    protRateEl.textContent = Math.round(prot / protGoal * 100) + '%';
   } else { protRateEl.textContent = '—'; }
   // 蛋白質 g/kg/day
   document.getElementById('prot-val').textContent =
