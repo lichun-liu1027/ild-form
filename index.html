@@ -1361,6 +1361,23 @@ function showToast(msg) {
 buildMedas();
 document.getElementById('q-date').value = new Date().toISOString().split('T')[0];
 update();
+
+// ── 防止數字輸入框被滑鼠滾輪 / 上下鍵誤改 ──
+document.querySelectorAll('input[type="number"]').forEach(el => {
+  // 滾輪滑過時不改變數值
+  el.addEventListener('wheel', function(e) {
+    if (document.activeElement === this) { this.blur(); }
+  }, { passive: true });
+  // 聚焦時滾輪也不改
+  el.addEventListener('focus', function() {
+    this.addEventListener('wheel', preventWheel, { passive: false });
+  });
+  el.addEventListener('blur', function() {
+    this.removeEventListener('wheel', preventWheel);
+  });
+});
+function preventWheel(e) { e.preventDefault(); }
+
 </script>
 </body>
 </html>
