@@ -1187,11 +1187,11 @@ function collectData() {
     熱量_kcal: document.getElementById('q-kcal').value,
     熱量需求_kcal: document.getElementById('q-kcal-goal').value,
     熱量達成率: document.getElementById('kcal-rate-val').textContent,
-    熱量需求_REE_kcal: (() => {
+    熱量需求_Morikawa_kcal: (() => {
       const morVal = parseFloat(document.getElementById('ref-morikawa-val').textContent);
       return morVal > 0 ? Math.round(morVal) : '';
     })(),
-    熱量達成率_REE: (() => {
+    熱量達成率_Morikawa: (() => {
       const kcal = parseFloat(document.getElementById('q-kcal').value);
       const morVal = parseFloat(document.getElementById('ref-morikawa-val').textContent);
       return (kcal > 0 && morVal > 0) ? Math.round(kcal / morVal * 100) + '%' : '';
