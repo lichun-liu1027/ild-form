@@ -271,6 +271,12 @@
     </div>
     <div class="field-row">
       <div class="field">
+        <div class="field-label">InBody-FFM 去脂體重</div>
+        <div class="input-unit"><input type="number" id="q-ffm" placeholder="kg" step="0.1" oninput="calcDietGoal()"><span class="unit">kg</span></div>
+      </div>
+    </div>
+    <div class="field-row">
+      <div class="field">
         <div class="field-label">握力（最大值）</div>
         <div class="input-unit"><input type="number" id="q-grip" placeholder="kg" step="0.1" oninput="calcGrip()"><span class="unit">kg</span></div>
       </div>
@@ -473,6 +479,90 @@
 <div class="section">
   <div class="section-header"><div class="num">⑤</div><h2>一日飲食回顧</h2></div>
   <div class="section-body">
+
+    <!-- ── 需求量參考估算 ── -->
+    <div style="background:#F0F9FF;border:1.5px solid #5EEAD4;border-radius:10px;padding:14px 16px;margin-bottom:1.25rem;">
+      <div style="font-weight:700;color:#0F766E;margin-bottom:10px;font-size:15px;">熱量／蛋白質需求參考估算（僅供參考，可套用至下方需求欄）</div>
+
+      <!-- 體重基礎顯示 -->
+      <div style="font-size:12px;color:#475569;margin-bottom:12px;line-height:1.8;">
+        實際體重：<span id="ref-abw-actual" style="font-weight:700;">—</span> kg　｜　
+        理想體重 IBW(BMI22)：<span id="ref-ibw22" style="font-weight:700;">—</span> kg　｜　
+        理想體重 IBW(Devine)：<span id="ref-ibw" style="font-weight:700;">—</span> kg　｜　
+        調整體重 ABW(Devine)：<span id="ref-abw" style="font-weight:700;">—</span> kg
+        <br><span style="color:#94A3B8;">（IBW/ABW 於 BMI≥30 時建議使用；Devine 公式需先選性別）</span>
+      </div>
+
+      <!-- 熱量估算 A：體重法 -->
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px;padding:8px;background:#FFFFFF;border-radius:8px;">
+        <span style="font-size:13px;font-weight:600;min-width:70px;">熱量（體重法）</span>
+        <select id="ref-kcal-bw-type" onchange="calcRef()" style="padding:4px 8px;border:1px solid #CBD5E1;border-radius:6px;font-size:13px;">
+          <option value="actual">實際體重</option>
+          <option value="ibw22">IBW(BMI22)</option>
+          <option value="abw22">ABW(BMI22)</option>
+          <option value="ibw">IBW(Devine)</option>
+          <option value="abw">ABW(Devine)</option>
+        </select>
+        <select id="ref-kcal-coef" onchange="calcRef()" style="padding:4px 8px;border:1px solid #CBD5E1;border-radius:6px;font-size:13px;">
+          <option value="20">20 kcal/kg</option>
+          <option value="25" selected>25 kcal/kg</option>
+          <option value="30">30 kcal/kg</option>
+          <option value="35">35 kcal/kg</option>
+          <option value="40">40 kcal/kg</option>
+          <option value="other">其他</option>
+        </select>
+        <input type="number" id="ref-kcal-coef-other" placeholder="kcal/kg" oninput="calcRef()" style="display:none;width:90px;padding:4px 8px;border:1px solid #CBD5E1;border-radius:6px;font-size:13px;">
+        <span style="font-size:13px;">＝</span>
+        <span id="ref-kcal-bw-val" style="font-weight:700;color:#0F766E;font-size:14px;min-width:70px;">— kcal</span>
+        <button type="button" onclick="applyKcal('bw')" style="padding:4px 12px;background:#0F766E;color:#fff;border:none;border-radius:6px;font-size:12px;cursor:pointer;">套用</button>
+      </div>
+
+      <!-- 熱量估算 B：Morikawa 2025 -->
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px;padding:8px;background:#FFFFFF;border-radius:8px;">
+        <span style="font-size:13px;font-weight:600;min-width:70px;">熱量（Morikawa 2025 ILD專用）</span>
+        <span style="font-size:11px;color:#94A3B8;">REE=456.99+22.54×FFM ×</span>
+        <select id="ref-morikawa-coef" onchange="calcRef()" style="padding:4px 8px;border:1px solid #CBD5E1;border-radius:6px;font-size:13px;">
+          <option value="1.2">活動 1.2</option>
+          <option value="1.3" selected>活動 1.3</option>
+          <option value="1.4">活動 1.4</option>
+          <option value="1.5">活動 1.5</option>
+          <option value="1.6">活動 1.6</option>
+          <option value="1.7">活動 1.7</option>
+          <option value="other">其他</option>
+        </select>
+        <input type="number" id="ref-morikawa-coef-other" placeholder="係數" step="0.1" oninput="calcRef()" style="display:none;width:80px;padding:4px 8px;border:1px solid #CBD5E1;border-radius:6px;font-size:13px;">
+        <span style="font-size:13px;">＝</span>
+        <span id="ref-morikawa-val" style="font-weight:700;color:#0F766E;font-size:14px;min-width:70px;">— kcal</span>
+        <button type="button" onclick="applyKcal('morikawa')" style="padding:4px 12px;background:#0F766E;color:#fff;border:none;border-radius:6px;font-size:12px;cursor:pointer;">套用</button>
+      </div>
+      <div style="font-size:11px;color:#94A3B8;line-height:1.6;margin:-2px 0 8px 8px;">
+        活動係數參考：體重穩定＋低活動量 ×1.3　｜　體重穩定＋中度活動 ×1.4–1.5　｜　體重流失 ×1.5–1.7（即使活動量低）
+      </div>
+
+      <!-- 蛋白質估算 -->
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:8px;background:#FFFFFF;border-radius:8px;">
+        <span style="font-size:13px;font-weight:600;min-width:70px;">蛋白質</span>
+        <select id="ref-prot-bw-type" onchange="calcRef()" style="padding:4px 8px;border:1px solid #CBD5E1;border-radius:6px;font-size:13px;">
+          <option value="actual">實際體重</option>
+          <option value="ibw22">IBW(BMI22)</option>
+          <option value="abw22">ABW(BMI22)</option>
+          <option value="ibw">IBW(Devine)</option>
+          <option value="abw">ABW(Devine)</option>
+        </select>
+        <select id="ref-prot-coef" onchange="calcRef()" style="padding:4px 8px;border:1px solid #CBD5E1;border-radius:6px;font-size:13px;">
+          <option value="1.2" selected>1.2 g/kg</option>
+          <option value="1.3">1.3 g/kg</option>
+          <option value="1.4">1.4 g/kg</option>
+          <option value="1.5">1.5 g/kg</option>
+          <option value="other">其他</option>
+        </select>
+        <input type="number" id="ref-prot-coef-other" placeholder="g/kg" step="0.1" oninput="calcRef()" style="display:none;width:80px;padding:4px 8px;border:1px solid #CBD5E1;border-radius:6px;font-size:13px;">
+        <span style="font-size:13px;">＝</span>
+        <span id="ref-prot-val" style="font-weight:700;color:#0F766E;font-size:14px;min-width:60px;">— g</span>
+        <button type="button" onclick="applyProt()" style="padding:4px 12px;background:#0F766E;color:#fff;border:none;border-radius:6px;font-size:12px;cursor:pointer;">套用</button>
+      </div>
+    </div>
+
     <div class="field-row3">
         <div class="field">
           <div class="field-label">熱量攝取</div>
@@ -766,7 +856,9 @@ function selectSGA(id, el, grade) {
 function selectRadio(id, el, val) {
   document.querySelectorAll('#'+id+' .opt-btn').forEach(b => b.className = 'opt-btn');
   el.className = 'opt-btn sel';
-  radioVals[id] = val; update();
+  radioVals[id] = val;
+  if (id === 'q-sex') { calcGrip(); calcRef(); }
+  update();
 }
 
 function toggleCheck(el, val) {
@@ -884,7 +976,93 @@ function calcDietGoal() {
   // 蛋白質 g/kg/day
   document.getElementById('prot-val').textContent =
     (prot > 0 && w > 0) ? (prot / w).toFixed(2) + ' g/kg/day' : '—';
+  calcRef();
   update();
+}
+
+// 需求量參考估算
+function getRefWeights() {
+  const w   = parseFloat(document.getElementById('q-wt').value) || 0;
+  const ht  = parseFloat(document.getElementById('q-ht').value) || 0;
+  const sex = radioVals['q-sex'];
+  let ibw = 0, abw = 0, ibw22 = 0, abw22 = 0;
+  // IBW (BMI=22)：不需性別
+  if (ht > 0) {
+    ibw22 = 22 * ((ht/100) ** 2);
+    abw22 = ibw22 + 0.25 * (w - ibw22);
+  }
+  // IBW (Devine)：需性別
+  if (ht > 0 && sex) {
+    const base = sex === '男' ? 50 : 45.5;
+    ibw = base + 2.3 * ((ht - 152.4) / 2.54);
+    if (ibw < 0) ibw = 0;
+    abw = ibw + 0.25 * (w - ibw);
+  }
+  return { actual: w, ibw, abw, ibw22, abw22 };
+}
+
+function calcRef() {
+  const wts = getRefWeights();
+  const sexSel = radioVals['q-sex'];
+  // 顯示三種體重
+  document.getElementById('ref-abw-actual').textContent = wts.actual > 0 ? wts.actual.toFixed(1) : '—';
+  document.getElementById('ref-ibw22').textContent = wts.ibw22 > 0 ? wts.ibw22.toFixed(1) : '—';
+  if (!sexSel) {
+    document.getElementById('ref-ibw').textContent = '需選性別';
+    document.getElementById('ref-abw').textContent = '需選性別';
+  } else {
+    document.getElementById('ref-ibw').textContent = wts.ibw > 0 ? wts.ibw.toFixed(1) : '—';
+    document.getElementById('ref-abw').textContent = wts.abw > 0 ? wts.abw.toFixed(1) : '—';
+  }
+
+  // 熱量體重法
+  const kcalType = document.getElementById('ref-kcal-bw-type').value;
+  const kcalCoefSel = document.getElementById('ref-kcal-coef').value;
+  const kcalOtherEl = document.getElementById('ref-kcal-coef-other');
+  kcalOtherEl.style.display = kcalCoefSel === 'other' ? 'inline-block' : 'none';
+  const kcalCoef = kcalCoefSel === 'other' ? (parseFloat(kcalOtherEl.value) || 0) : parseFloat(kcalCoefSel);
+  const kcalW = wts[kcalType] || 0;
+  const kcalBwVal = kcalW * kcalCoef;
+  document.getElementById('ref-kcal-bw-val').textContent = kcalBwVal > 0 ? Math.round(kcalBwVal) + ' kcal' : '— kcal';
+
+  // Morikawa
+  const ffm = parseFloat(document.getElementById('q-ffm').value) || 0;
+  const morSel = document.getElementById('ref-morikawa-coef').value;
+  const morOtherEl = document.getElementById('ref-morikawa-coef-other');
+  morOtherEl.style.display = morSel === 'other' ? 'inline-block' : 'none';
+  const morCoef = morSel === 'other' ? (parseFloat(morOtherEl.value) || 0) : parseFloat(morSel);
+  const ree = ffm > 0 ? (456.988 + 22.539 * ffm) : 0;
+  const morVal = ree * morCoef;
+  document.getElementById('ref-morikawa-val').textContent = morVal > 0 ? Math.round(morVal) + ' kcal' : '— kcal';
+
+  // 蛋白質
+  const protType = document.getElementById('ref-prot-bw-type').value;
+  const protSel = document.getElementById('ref-prot-coef').value;
+  const protOtherEl = document.getElementById('ref-prot-coef-other');
+  protOtherEl.style.display = protSel === 'other' ? 'inline-block' : 'none';
+  const protCoef = protSel === 'other' ? (parseFloat(protOtherEl.value) || 0) : parseFloat(protSel);
+  const protW = wts[protType] || 0;
+  const protRefVal = protW * protCoef;
+  document.getElementById('ref-prot-val').textContent = protRefVal > 0 ? Math.round(protRefVal) + ' g' : '— g';
+}
+
+function applyKcal(which) {
+  const txt = which === 'bw'
+    ? document.getElementById('ref-kcal-bw-val').textContent
+    : document.getElementById('ref-morikawa-val').textContent;
+  const val = parseFloat(txt);
+  if (val > 0) {
+    document.getElementById('q-kcal-goal').value = Math.round(val);
+    calcDietGoal();
+  }
+}
+
+function applyProt() {
+  const val = parseFloat(document.getElementById('ref-prot-val').textContent);
+  if (val > 0) {
+    document.getElementById('q-prot-goal').value = Math.round(val);
+    calcDietGoal();
+  }
 }
 
 function calcIPAQ() {
@@ -983,6 +1161,7 @@ function collectData() {
     BIA測量時段: radioVals['q-biatime'] || '',
     SMI_kg_m2: document.getElementById('q-smi').value,
     PBF_pct: document.getElementById('q-pbf').value,
+    FFM_kg: document.getElementById('q-ffm').value,
     握力_kg: document.getElementById('q-grip').value,
     握力判讀_AWGS2025: document.getElementById('grip-val').textContent.replace('⚠️ ','').replace('✓ ',''),
     SGA_S1_6M體重: sgaVals['q-s1a'] || '',
@@ -1126,6 +1305,20 @@ function resetForm() {
     const el = document.getElementById(id);
     if (el) { el.textContent = '—'; el.style.background = ''; el.style.color = ''; }
   });
+
+  // 5c. 重設需求量參考估算欄
+  document.getElementById('ref-kcal-bw-type').value = 'actual';
+  document.getElementById('ref-kcal-coef').value = '25';
+  document.getElementById('ref-kcal-coef-other').style.display = 'none';
+  document.getElementById('ref-morikawa-coef').value = '1.3';
+  document.getElementById('ref-morikawa-coef-other').style.display = 'none';
+  document.getElementById('ref-prot-bw-type').value = 'actual';
+  document.getElementById('ref-prot-coef').value = '1.2';
+  document.getElementById('ref-prot-coef-other').style.display = 'none';
+  ['ref-abw-actual','ref-ibw22','ref-ibw','ref-abw'].forEach(id => document.getElementById(id).textContent = '—');
+  document.getElementById('ref-kcal-bw-val').textContent = '— kcal';
+  document.getElementById('ref-morikawa-val').textContent = '— kcal';
+  document.getElementById('ref-prot-val').textContent = '— g';
 
   // 7. 重設 MEDAS 分數卡片
   document.getElementById('medas-total').textContent    = '0';
